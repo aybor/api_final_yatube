@@ -109,7 +109,7 @@ URL /api/v1/posts/?limit=2&offset=1
 JSON {
     "count": 3,
     "next": null,
-    "previous": "http://127.0.0.1:8000/api/v1/posts/?limit=2",
+    "previous": "/api/v1/posts/?limit=2",
     "results": [
         {
             "id": 2,
