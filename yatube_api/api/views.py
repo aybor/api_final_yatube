@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from posts.models import Comment, Follow, Group, Post
-from rest_framework import filters, permissions, viewsets
+from rest_framework import filters, mixins, permissions, viewsets
 from rest_framework.exceptions import PermissionDenied
 
 from .serializers import (CommentSerializer, FollowSerializer, GroupSerializer,
@@ -44,10 +44,9 @@ class CommentViewSet(viewsets.ModelViewSet):
         post = get_object_or_404(Post, pk=self.kwargs['post'])
         serializer.save(author=self.request.user, post=post)
 
-    def list(self, request, *args, **kwargs):
+    def get_queryset(self):
         post = get_object_or_404(Post, pk=self.kwargs['post'])
-        self.queryset = post.comments
-        return super(CommentViewSet, self).list(request)
+        return post.comments
 
     def perform_update(self, serializer):
         if serializer.instance.author_id != self.request.user.id:
@@ -60,8 +59,15 @@ class CommentViewSet(viewsets.ModelViewSet):
         super(CommentViewSet, self).perform_destroy(instance)
 
 
-class FollowViewSet(viewsets.ModelViewSet):
-    http_method_names = ('get', 'post')
+class GetPostViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
+
+
+class FollowViewSet(GetPostViewSet):
     serializer_class = FollowSerializer
     pagination_class = None
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
